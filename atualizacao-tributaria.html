@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Atualizacao Tributaria Diaria",
+  "schemaVersion": 1,
+  "description": "Site de monitoramento diário de publicações tributárias brasileiras: Receita Federal, Portal NF-e, CONFAZ, CGIBS e IOB. Atualizado automaticamente toda manhã pela tarefa agendada atualizao_tributria.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualização Tributária Diária</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; font-size: 14px; background: #f0f4f8; color: #1a2636; }
+  .header { background: linear-gradient(135deg, #002855 0%, #0053a0 100%); color: #fff; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header-left p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+  .badge-data { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .tabs { display: flex; gap: 2px; background: #dbe5f0; padding: 6px 20px 0; overflow-x: auto; }
+  .tab { padding: 8px 18px; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 13px; font-weight: 600; color: #4a6080; background: transparent; border: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
+  .tab:hover { background: rgba(255,255,255,0.6); }
+  .tab.active { background: #f0f4f8; color: #002855; }
+  .main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+  .resumo { background: #fff; border: 1px solid #c8daf0; border-left: 5px solid #0053a0; border-radius: 6px; padding: 14px 18px; margin-bottom: 18px; }
+  .resumo h2 { font-size: 13px; font-weight: 700; color: #002855; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .resumo-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+  .resumo-pill { background: #eef4fb; border: 1px solid #b8d0eb; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; color: #003a80; }
+  .resumo-pill span { font-weight: 400; color: #555; margin-left: 4px; }
+  .alerta-prazo { margin-top: 12px; background: #fff8e1; border: 1px solid #f5c842; border-radius: 5px; padding: 8px 12px; font-size: 12px; color: #7a5c00; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: #fff; border-radius: 8px; border: 1px solid #dce7f3; margin-bottom: 14px; overflow: hidden; }
+  .card-header { background: #f4f8fd; border-bottom: 1px solid #dce7f3; padding: 10px 16px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+  .card-title { font-size: 13px; font-weight: 700; color: #002855; }
+  .card-date { font-size: 11px; color: #666; background: #e8eef7; border-radius: 12px; padding: 2px 10px; font-weight: 600; }
+  .card-body { padding: 14px 16px; line-height: 1.6; }
+  .card-body p { margin-bottom: 8px; font-size: 13px; }
+  .card-body ul { padding-left: 18px; margin-bottom: 8px; }
+  .card-body li { margin-bottom: 4px; font-size: 13px; }
+  .card-body strong { color: #002855; }
+  .card-footer { padding: 8px 16px; border-top: 1px solid #eef1f5; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #fafcff; }
+  .btn-link { display: inline-block; background: #0053a0; color: #fff; border-radius: 4px; padding: 4px 12px; font-size: 12px; text-decoration: none; font-weight: 600; transition: background 0.15s; }
+  .btn-link:hover { background: #003d7a; }
+  .btn-link.secondary { background: #5a7a9a; }
+  .tag { display: inline-block; border-radius: 3px; padding: 2px 8px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+  .tag-nt { background: #fff3e0; color: #b35c00; border: 1px solid #f0c070; }
+  .tag-conv { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
+  .tag-in { background: #f3e5f5; color: #6a1b9a; border: 1px solid #ba68c8; }
+  .tag-port { background: #e3f2fd; color: #0d47a1; border: 1px solid #64b5f6; }
+  .tag-sc { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
+  .empty { text-align: center; padding: 40px 20px; color: #8899aa; font-size: 13px; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .footer { text-align: center; padding: 16px; font-size: 11px; color: #8899aa; }
+  .footer a { color: #0053a0; }
+  .sources-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .source-chip { background: #eef4fb; border: 1px solid #c0d8f0; border-radius: 4px; padding: 4px 10px; font-size: 11px; }
+  .source-chip a { color: #003a80; text-decoration: none; font-weight: 600; }
+  .hist-date { font-size: 13px; font-weight: 700; color: #002855; }
+  .hist-count { font-size: 11px; color: #5a7a9a; margin-left: 8px; font-weight: 400; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>&#9878;&#65039; Atualização Tributária Diária</h1>
+    <p>Monitoramento de normas: Receita Federal · CGIBS · Portal NF-e · CONFAZ · IOB</p>
+  </div>
+  <div class="badge-data">&#128197; Ref.: 15/07/2026 · Atualizado: 16/07/2026</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('resumo-tab', this)">&#128203; Resumo</button>
+  <button class="tab" onclick="showTab('nt-tab', this)">&#128196; Notas Técnicas</button>
+  <button class="tab" onclick="showTab('convenio-tab', this)">&#128220; Convênios ICMS</button>
+  <button class="tab" onclick="showTab('in-tab', this)">&#128209; Instruções Normativas</button>
+  <button class="tab" onclick="showTab('portaria-tab', this)">&#128193; Portarias</button>
+  <button class="tab" onclick="showTab('sc-tab', this)">&#128172; Soluções de Consulta</button>
+  <button class="tab" onclick="showTab('historico-tab', this)">&#128336; Histórico</button>
+</div>
+
+<div class="main">
+
+  <!-- RESUMO -->
+  <div id="resumo-tab" class="section active">
+    <div class="resumo">
+      <h2>&#128204; Publicações de 15/07/2026</h2>
+      <div class="resumo-grid">
+        <div class="resumo-pill">Notas Técnicas <span>1</span></div>
+        <div class="resumo-pill">Convênios ICMS <span>4</span></div>
+        <div class="resumo-pill">Instruções Normativas <span>1</span></div>
+        <div class="resumo-pill">Portarias <span>1</span></div>
+        <div class="resumo-pill">Soluções de Consulta <span>1</span></div>
+      </div>
+      <div class="alerta-prazo">
+        &#9888;&#65039; <strong>Atenção — prazo crítico:</strong> <strong>31/07/2026</strong> é o último dia para preenchimento <em>facultativo</em> dos campos IBS/CBS nos DFe.
+        A partir de <strong>03/08/2026</strong>, o preenchimento torna-se <strong>obrigatório</strong> para contribuintes do regime regular (CRT 3).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-nt">Nota Técnica</span> NT 2014.001 v.1.40 — Restrição EPEC para PR e PB</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p>Proíbe o uso do <strong>EPEC (Evento Prévio de Emissão em Contingência)</strong> para contribuintes vinculados às Sefaz do <strong>Paraná</strong> e da <strong>Paraíba</strong>. Impacto operacional imediato para emissores NF-e nesses estados.</p>
+        <p>Homologação: <strong>09/09/2026</strong> · Produção: <strong>05/10/2026</strong> · Base: Ajuste SINIEF 25/2026</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="http://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-conv">Convênios ICMS</span> CONFAZ — 4 convênios (426ª Reunião Extraordinária, 14/07/2026)</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><strong>ICMS 87/2026</strong> — Prorroga até 31/12/2026 redução BC ICMS em pneus/câmaras (Conv. 6/2009)</li>
+          <li><strong>ICMS 88/2026</strong> — Prorroga até 31/12/2026 dedução PIS/COFINS da BC ICMS (Lei 10.147/00)</li>
+          <li><strong>ICMS 89/2026</strong> — SP sai da ST de tintas e vernizes</li>
+          <li><strong>ICMS 90/2026</strong> — SP sai da ST de pneus, câmaras de ar e protetores de borracha</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">CONFAZ</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-in">IN RFB</span> nº 2.336/2026 — Restituição automática IRPF 2025</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p>Dispõe sobre a restituição automática do IRPF referente ao exercício de 2025 (ano-calendário de 2024).</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-port">Portaria SECEX</span> nº 522/2026 — Cotas importação (NCM 8541.43.00)</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p>Estabelece critérios para alocação de cota de importação (Resolução CAMEX 759/2025) para <strong>células fotovoltaicas</strong> em módulos ou painéis — NCM 8541.43.00. DOU Extra A.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-secex-n-522-de-14-de-julho-de-2026-719259996" target="_blank">DOU Oficial</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-sc">SC Cosit</span> nº 98.169/2026 — Classificação fiscal (7 NCMs)</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p>Solução de Consulta sobre classificação fiscal de mercadorias. Impacta NCMs: 3824.99.79 · 8418.69.99 · 8504.40.21 · 8535.90.90 · 8543.70.99 · 9019.20.90 · 9405.41.00</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/solucao-de-consulta-n-98.169-de-28-de-maio-de-2026-719505866" target="_blank">DOU Oficial</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS TÉCNICAS -->
+  <div id="nt-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-nt">NT</span> Nota Técnica 2014.001 v.1.40 — EPEC: restrição para PR e PB</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Receita Federal do Brasil / ENCAT &nbsp;|&nbsp; <strong>Fonte:</strong> Portal NF-e</p>
+        <p>Determina que contribuintes vinculados às Sefaz do <strong>Paraná</strong> e da <strong>Paraíba</strong> não poderão utilizar o <strong>EPEC</strong> para emissão de NF-e em contingência.</p>
+        <p>O EPEC é uma alternativa de contingência que permite ao contribuinte registrar previamente um conjunto reduzido de informações no ambiente nacional, possibilitando a impressão do DANFE em papel comum enquanto os serviços da Sefaz estão indisponíveis.</p>
+        <ul>
+          <li>Homologação: <strong>09/09/2026</strong></li>
+          <li>Produção: <strong>05/10/2026</strong></li>
+          <li>Base legal: Ajuste SINIEF nº 25/2026</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="http://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=JtWH/2b4Vk0=" target="_blank">Documento NT</a>
+        <a class="btn-link secondary" href="http://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVÊNIOS ICMS -->
+  <div id="convenio-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-conv">Convênio ICMS</span> nº 87/2026 — Redução BC ICMS em pneus e câmaras de ar</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> CONFAZ — 426ª Reunião Extraordinária (14/07/2026) &nbsp;|&nbsp; <strong>Setor:</strong> Pneumáticos (NCM 40.11 e 40.13)</p>
+        <p>Altera a Cláusula quinta do Convênio ICMS nº 6/2009, <strong>prorrogando até 31/12/2026</strong> a redução da base de cálculo do ICMS nas operações interestaduais com pneumáticos novos de borracha e câmaras-de-ar realizadas pelo fabricante ou importador sujeito ao regime monofásico de PIS/COFINS (Lei 10.485/02).</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.confaz.fazenda.gov.br/legislacao/convenios/2026/CV087_26" target="_blank">Texto CONFAZ</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-conv">Convênio ICMS</span> nº 88/2026 — Dedução PIS/COFINS da BC do ICMS (Lei 10.147/00)</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> CONFAZ — 426ª Reunião Extraordinária (14/07/2026) &nbsp;|&nbsp; <strong>Setor:</strong> Higiene pessoal, perfumaria e cosméticos (Lei 10.147/00)</p>
+        <p>Altera a Cláusula sétima do Convênio ICMS nº 34/2006, <strong>prorrogando até 31/12/2026</strong> a possibilidade de dedução da parcela de PIS/PASEP e COFINS (operações subsequentes) da base de cálculo do ICMS para produtos indicados na Lei Federal nº 10.147/00.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.confaz.fazenda.gov.br/legislacao/convenios/2026/CV088_26" target="_blank">Texto CONFAZ</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-conv">Convênio ICMS</span> nº 89/2026 — SP sai da ST de tintas e vernizes</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> CONFAZ — 426ª Reunião Extraordinária (14/07/2026) &nbsp;|&nbsp; <strong>Setor:</strong> Tintas e vernizes (impacto em SP)</p>
+        <p>Retira o Estado de <strong>São Paulo</strong> do convênio que estabelecia o regime de substituição tributária para tintas e vernizes. Empresas com operações ST envolvendo SP nesse segmento devem revisar seus acordos e escrituração.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.confaz.fazenda.gov.br/legislacao/convenios/2026/CV089_26" target="_blank">Texto CONFAZ</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-conv">Convênio ICMS</span> nº 90/2026 — SP sai da ST de pneus, câmaras e protetores</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> CONFAZ — 426ª Reunião Extraordinária (14/07/2026) &nbsp;|&nbsp; <strong>Setor:</strong> Pneumáticos/borracha (impacto em SP)</p>
+        <p>Retira o Estado de <strong>São Paulo</strong> do convênio sobre substituição tributária de pneus, câmaras de ar e protetores de borracha. Junto com o Conv. 89/2026, sinaliza a reorganização da ST no mercado paulista antecipando o fim do ICMS em 01/01/2027.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.confaz.fazenda.gov.br/legislacao/convenios/2026/CV090_26" target="_blank">Texto CONFAZ</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTRUÇÕES NORMATIVAS -->
+  <div id="in-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-in">IN RFB</span> nº 2.336, de 14/07/2026 — Restituição automática IRPF exercício 2025</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Receita Federal do Brasil &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 15/07/2026</p>
+        <p>Dispõe sobre a <strong>restituição automática</strong> do Imposto sobre a Renda da Pessoa Física referente ao exercício de 2025 (ano-calendário de 2024), estabelecendo procedimentos e cronograma para créditos automáticos em conta para contribuintes com direito à restituição da DIRPF 2025.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTARIAS -->
+  <div id="portaria-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-port">Portaria SECEX</span> nº 522, de 14/07/2026 — Cotas de importação (células fotovoltaicas)</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Secretaria de Comércio Exterior — MDIC &nbsp;|&nbsp; <strong>DOU:</strong> 15/07/2026 Edição 131-A (Extra A), Seção 1</p>
+        <p>Estabelece critérios para alocação de cota de importação determinada pela Resolução CAMEX nº 759/2025.</p>
+        <p><strong>NCM impactado:</strong> 8541.43.00 — Células fotovoltaicas montadas em módulos ou painéis.</p>
+        <p>Define os parâmetros de distribuição de cotas entre importadores habilitados, com impacto direto em empresas do setor de energia solar.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-secex-n-522-de-14-de-julho-de-2026-719259996" target="_blank">DOU Oficial</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLUÇÕES DE CONSULTA -->
+  <div id="sc-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-sc">SC Cosit</span> nº 98.169, de 28/05/2026 — Classificação fiscal de mercadorias</span>
+        <span class="card-date">15/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Receita Federal do Brasil — Cosit &nbsp;|&nbsp; <strong>Emitida:</strong> 28/05/2026 &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 15/07/2026</p>
+        <p>Solução de consulta sobre <strong>classificação fiscal de mercadorias</strong> na NCM. Vinculante para o consulente; serve de orientação para contribuintes em situação idêntica. NCMs impactados:</p>
+        <ul>
+          <li><strong>3824.99.79</strong> — Produtos químicos e preparações diversas</li>
+          <li><strong>8418.69.99</strong> — Aparelhos para produção de frio</li>
+          <li><strong>8504.40.21</strong> — Conversores estáticos</li>
+          <li><strong>8535.90.90</strong> — Aparelhos para corte/proteção de circuitos elétricos</li>
+          <li><strong>8543.70.99</strong> — Máquinas e aparelhos elétricos diversos</li>
+          <li><strong>9019.20.90</strong> — Aparelhos de ozonoterapia, respiração artificial</li>
+          <li><strong>9405.41.00</strong> — Outros aparelhos de iluminação elétrica</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/solucao-de-consulta-n-98.169-de-28-de-maio-de-2026-719505866" target="_blank">DOU Oficial</a>
+        <a class="btn-link secondary" href="http://normas.receita.fazenda.gov.br/" target="_blank">Normas RFB</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div id="historico-tab" class="section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 15/07/2026 <span class="hist-count">(8 publicações)</span></span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><span class="tag tag-nt">NT</span> Nota Técnica 2014.001 v.1.40 — EPEC: restrição PR/PB (Portal NF-e)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 87/2026 — BC ICMS pneus/câmaras, prorrogação até 31/12/2026 (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 88/2026 — Dedução PIS/COFINS Lei 10.147/00, prorrogação até 31/12/2026 (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 89/2026 — SP sai da ST de tintas e vernizes (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 90/2026 — SP sai da ST de pneus/borracha (CONFAZ)</li>
+          <li><span class="tag tag-in">IN</span> IN RFB 2.336/2026 — Restituição automática IRPF exercício 2025 (Receita Federal)</li>
+          <li><span class="tag tag-port">Port.</span> Portaria SECEX 522/2026 — Cotas importação NCM 8541.43.00 (MDIC, Extra A)</li>
+          <li><span class="tag tag-sc">SC</span> SC Cosit 98.169/2026 — Classificação mercadorias 7 NCMs (Receita Federal)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="empty" style="padding:20px;font-size:12px;">Dias anteriores serão adicionados automaticamente a cada atualização diária.</div>
+  </div>
+
+  <div class="footer">
+    Fontes monitoradas:
+    <div class="sources-list" style="justify-content:center;margin-top:6px;">
+      <span class="source-chip"><a href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">normas.receita.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.nfe.fazenda.gov.br/portal/principal.aspx" target="_blank">nfe.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">confaz.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.cgibs.gov.br/inicial" target="_blank">cgibs.gov.br</a></span>
+      <span class="source-chip"><a href="https://noticias.iob.com.br/reforma-tributaria/" target="_blank">noticias.iob.com.br</a></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
