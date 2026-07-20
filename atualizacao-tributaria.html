@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Atualizacao Tributaria Diaria",
+  "schemaVersion": 1,
+  "description": "Site de monitoramento diário de publicações tributárias brasileiras: Receita Federal, Portal NF-e, CONFAZ, CGIBS e IOB. Atualizado automaticamente toda manhã pela tarefa agendada `atualizao_tributria`.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -24,6 +33,7 @@
   .resumo-pill span { font-weight: 400; color: #555; margin-left: 4px; }
   .alerta-prazo { margin-top: 12px; background: #fff3e0; border: 1px solid #f5a623; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7a3c00; line-height: 1.6; }
   .alerta-critico { margin-top: 8px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7f0000; line-height: 1.6; }
+  .alerta-fim-semana { margin-top: 12px; background: #f5f5f5; border: 1px solid #bdbdbd; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #555; line-height: 1.6; }
   .section { display: none; }
   .section.active { display: block; }
   .card { background: #fff; border-radius: 8px; border: 1px solid #dce7f3; margin-bottom: 14px; overflow: hidden; }
@@ -46,6 +56,7 @@
   .tag-port { background: #e3f2fd; color: #0d47a1; border: 1px solid #64b5f6; }
   .tag-sc { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
   .tag-dec { background: #e0f2f1; color: #004d40; border: 1px solid #4db6ac; }
+  .tag-cgibs { background: #ede7f6; color: #4527a0; border: 1px solid #9575cd; }
   .empty { text-align: center; padding: 40px 20px; color: #8899aa; font-size: 13px; }
   .empty-icon { font-size: 32px; margin-bottom: 8px; }
   .footer { text-align: center; padding: 16px; font-size: 11px; color: #8899aa; }
@@ -57,6 +68,7 @@
   .hist-count { font-size: 11px; color: #5a7a9a; margin-left: 8px; font-weight: 400; }
   .countdown { display: inline-block; background: #d32f2f; color: #fff; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-left: 6px; }
   .countdown-warn { background: #f57f17; }
+  .sem-dou { background: #eceff1; border-left: 4px solid #90a4ae; border-radius: 6px; padding: 14px 18px; margin-bottom: 18px; color: #546e7a; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -66,7 +78,7 @@
     <h1>&#9878;&#65039; Atualização Tributária Diária</h1>
     <p>Monitoramento de normas: Receita Federal · CGIBS · Portal NF-e · CONFAZ · IOB</p>
   </div>
-  <div class="badge-data">&#128197; Ref.: 16/07/2026 · Atualizado: 17/07/2026</div>
+  <div class="badge-data">&#128197; Ref.: 19/07/2026 · Atualizado: 20/07/2026</div>
 </div>
 
 <div class="tabs">
@@ -83,76 +95,113 @@
 
   <!-- RESUMO -->
   <div id="resumo-tab" class="section active">
+
+    <div class="sem-dou">
+      &#128685; <strong>19/07/2026 — Domingo.</strong> O Diário Oficial da União não é publicado aos domingos. Não há publicações tributárias federais oficiais para esta data. O DOU da próxima segunda-feira (20/07/2026) será o próximo a ser monitorado.
+    </div>
+
     <div class="resumo">
-      <h2>&#128204; Publicações de 16/07/2026 (DOU Quinta-feira)</h2>
+      <h2>&#128204; Publicações de 19/07/2026 (DOU Domingo — sem publicação)</h2>
       <div class="resumo-grid">
         <div class="resumo-pill">Notas Técnicas <span>0</span></div>
         <div class="resumo-pill">Convênios ICMS <span>0</span></div>
         <div class="resumo-pill">Instruções Normativas <span>0</span></div>
-        <div class="resumo-pill">Portarias <span>2</span></div>
-        <div class="resumo-pill">Decretos <span>1</span></div>
+        <div class="resumo-pill">Portarias <span>0</span></div>
         <div class="resumo-pill">Soluções de Consulta <span>0</span></div>
       </div>
       <div class="alerta-critico">
-        &#128680; <strong>PRAZO URGENTE — Reforma Tributária IBS/CBS:</strong><br>
-        <strong>31/07/2026</strong> <span class="countdown">14 dias</span> — Último dia do período facultativo de preenchimento dos campos IBS e CBS nos DFe (NF-e, NFC-e, CT-e, MDF-e). Após essa data, documentos sem os campos poderão ser rejeitados automaticamente.<br>
-        <strong>03/08/2026</strong> <span class="countdown">17 dias</span> — Início da <strong>obrigatoriedade sistêmica</strong> do preenchimento dos campos IBS/CBS para contribuintes do regime regular (CRT 3). O sistema rejeitará automaticamente documentos incompletos. Alíquota teste: 1% (0,1% IBS + 0,9% CBS).
+        &#128680; <strong>PRAZO CRÍTICO — Reforma Tributária IBS/CBS:</strong><br>
+        <strong>31/07/2026</strong> <span class="countdown">12 dias</span> — Último dia do período facultativo de preenchimento dos campos IBS e CBS nos DFe (NF-e, NFC-e, CT-e, MDF-e). Após essa data, documentos sem os campos poderão ser rejeitados automaticamente.<br>
+        <strong>03/08/2026</strong> <span class="countdown">15 dias</span> — Início da <strong>obrigatoriedade sistêmica</strong> do preenchimento dos campos IBS/CBS para contribuintes do regime regular (CRT 3=Normal). O sistema rejeitará documentos incompletos. Alíquota de teste: 1% (0,1% IBS + 0,9% CBS).
+      </div>
+      <div class="alerta-prazo">
+        &#9888;&#65039; <strong>CGIBS — Inscrição no CNPJ para pessoas físicas prorrogada:</strong><br>
+        RFB e CGIBS publicaram medida prorrogando a obrigatoriedade de inscrição no CNPJ por pessoas físicas para emissão de documentos fiscais eletrônicos. O prazo foi postergado para <strong>1º de janeiro de 2027</strong> (anteriormente era julho de 2026), para permitir adaptação dos contribuintes e o desenvolvimento de um sistema simplificado de inscrição.
       </div>
     </div>
 
     <p style="font-size:12px;color:#6a7f9a;margin-bottom:14px;padding:0 4px;">
-      &#128337; Dia com volume baixo de publicações tributárias relevantes. Portarias administrativas e decreto de política industrial publicados. Nenhuma Instrução Normativa, Nota Técnica NF-e ou Convênio ICMS novo.
+      &#128337; Sem publicações oficiais no DOU de domingo. Destacamos abaixo os atos mais relevantes publicados na semana (últimas publicações conhecidas até 16/07/2026) e os prazos críticos da Reforma Tributária.
     </p>
 
+    <!-- Recapitulação da semana — últimas publicações relevantes -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria RFB</span> ALF/STS n° 208/2026 — Organização interna Alfândega Santos</span>
-        <span class="card-date">16/07/2026</span>
+        <span class="card-title"><span class="tag tag-in">IN RFB</span> nº 2.336/2026 — Restituição automática IRPF exercício 2025</span>
+        <span class="card-date">15/07/2026</span>
       </div>
       <div class="card-body">
-        <p><strong>Órgão:</strong> Receita Federal do Brasil — Alfândega do Porto de Santos &nbsp;|&nbsp; <strong>Emitida:</strong> 15/07/2026</p>
-        <p>Altera a Portaria ALF/STS n° 7/2021, que dispõe sobre a <strong>organização interna e atribuições de competências</strong> da Alfândega da Receita Federal do Brasil no Porto de Santos/SP. Impacto operacional para empresas com despachos aduaneiros via Porto de Santos — eventuais mudanças nos fluxos de atendimento e responsabilidades setoriais.</p>
+        <p><strong>Órgão:</strong> Receita Federal do Brasil &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 15/07/2026</p>
+        <p>Instrução Normativa mais recente publicada na semana. Regulamenta procedimentos para restituição automática do IRPF relativo ao exercício 2025 (ano-calendário 2024). Relevante para contribuintes com saldo a restituir que precisam acompanhar os lotes de pagamento.</p>
       </div>
       <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-alf/sts-n-208-de-15-de-julho-de-2026-719514101" target="_blank">DOU Oficial</a>
+        <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
       </div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria SECEX</span> nº 523/2026 — Certificados de origem: atuação nacional</span>
-        <span class="card-date">16/07/2026</span>
+        <span class="card-title"><span class="tag tag-conv">Conv. ICMS</span> 87 a 90/2026 — 426ª Reunião Extraordinária do CONFAZ</span>
+        <span class="card-date">15/07/2026</span>
       </div>
       <div class="card-body">
-        <p><strong>Órgão:</strong> Secretaria de Comércio Exterior — MDIC &nbsp;|&nbsp; <strong>Emitida:</strong> 15/07/2026</p>
-        <p>Altera a Portaria SECEX nº 249/2023 para <strong>permitir a atuação em âmbito nacional</strong> das entidades de classe expressamente autorizadas a emitir certificados de origem. Relevante para exportadores e para empresas que utilizam certificados de origem preferencial em acordos comerciais internacionais (ex: Mercosul, acordos bilaterais).</p>
+        <p><strong>Órgão:</strong> CONFAZ &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 15/07/2026</p>
+        <p>Publicados quatro convênios na semana passada, com destaques para:</p>
+        <ul>
+          <li><strong>Conv. ICMS 87/2026</strong> — BC ICMS pneus/câmaras, prorrogação de benefício até 31/12/2026</li>
+          <li><strong>Conv. ICMS 88/2026</strong> — Dedução PIS/COFINS (Lei 10.147/00), prorrogação até 31/12/2026</li>
+          <li><strong>Conv. ICMS 89/2026</strong> — SP sai do regime de Substituição Tributária de tintas e vernizes</li>
+          <li><strong>Conv. ICMS 90/2026</strong> — SP sai do regime de Substituição Tributária de pneus e borracha</li>
+        </ul>
       </div>
       <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-secex-n-523-de-15-de-julho-de-2026-719509797" target="_blank">DOU Oficial</a>
+        <a class="btn-link secondary" href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">CONFAZ — Convênios ICMS</a>
       </div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <span class="card-title"><span class="tag tag-dec">Decreto</span> nº 13.065/2026 — Programa de Semicondutores (PADIS)</span>
-        <span class="card-date">16/07/2026</span>
+        <span class="card-title"><span class="tag tag-cgibs">CGIBS</span> Ato Conjunto nº 3/2026 — Documentação técnica DeRE v.1.1.0</span>
+        <span class="card-date">Jun/2026</span>
       </div>
       <div class="card-body">
-        <p><strong>Órgão:</strong> Presidência da República &nbsp;|&nbsp; <strong>Emitido:</strong> 15/07/2026</p>
-        <p>Altera o Decreto nº 10.615/2021 (PADIS — Programa de Apoio ao Desenvolvimento Tecnológico da Indústria de Semicondutores), regulamentando o art. 3° da Lei nº 14.968/2024 para dispor sobre o <strong>Programa Brasil Semicondutores</strong>. Potencial impacto fiscal para empresas do setor de microeletrônica que acessam benefícios fiscais do PADIS (desoneração de IPI, PIS/COFINS, CIDE).</p>
+        <p><strong>Órgão:</strong> Comitê Gestor do IBS (CGIBS) + Receita Federal &nbsp;|&nbsp; <strong>Publicação:</strong> Junho de 2026</p>
+        <p>O CGIBS e a Receita Federal publicaram o <strong>Ato Conjunto nº 3/2026</strong> disponibilizando a versão 1.1.0 do pacote de documentação técnica da <strong>Declaração de Regimes Específicos (DeRE)</strong> — conjunto de especificações necessárias à implementação desta obrigação acessória do IBS/CBS para empresas em regimes diferenciados.</p>
       </div>
       <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/decreto-n-13.065-de-15-de-julho-de-2026-719521081" target="_blank">DOU Oficial</a>
+        <a class="btn-link secondary" href="https://www.cgibs.gov.br/atos-conjuntos" target="_blank">CGIBS — Atos Conjuntos</a>
+        <a class="btn-link secondary" href="https://www.cgibs.gov.br/inicial" target="_blank">CGIBS — Inicial</a>
       </div>
     </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-nt">NT NF-e</span> 2025.002 v.1.40 + NT 2026.002 v.1.0 + NT 2026.003 v.1.0 — Schemas IBS/CBS atualizados</span>
+        <span class="card-date">10/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Portal NF-e (ENCAT/RFB) &nbsp;|&nbsp; <strong>Disponibilização:</strong> ~10/07/2026</p>
+        <p>Schemas XML da NF-e (versão 010e_v.1.02) foram atualizados contendo:</p>
+        <ul>
+          <li><strong>NT 2025.002 v.1.40</strong> — Atualização dos campos IBS/CBS/IS na NF-e e NFC-e</li>
+          <li><strong>NT 2026.002 v.1.0</strong> — Novos grupos e regras de validação para Reforma Tributária</li>
+          <li><strong>NT 2026.003 v.1.0</strong> — Complementações ao leiaute dos documentos fiscais eletrônicos</li>
+        </ul>
+        <p>&#9888;&#65039; Contribuintes e desenvolvedores de sistemas devem atualizar seus sistemas antes de <strong>31/07/2026</strong> para evitar rejeições no ambiente de produção a partir de 03/08/2026.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e — Notas Técnicas</a>
+      </div>
+    </div>
+
   </div>
 
   <!-- NOTAS TÉCNICAS -->
   <div id="nt-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128196;</div>
-      <strong>Nenhuma Nota Técnica publicada em 16/07/2026.</strong><br>
-      <span style="font-size:12px;">Última NT: 2014.001 v.1.40 (EPEC — PR/PB), publicada em 15/07/2026. Consulte o Portal NF-e para atualizações.</span>
+      <strong>Nenhuma Nota Técnica publicada em 19/07/2026 (domingo — sem DOU).</strong><br>
+      <span style="font-size:12px;">Última atualização conhecida: NT 2025.002 v.1.40 + NT 2026.002 e 2026.003 v.1.0, disponibilizadas em ~10/07/2026. NT 2014.001 v.1.40 (EPEC PR/PB) publicada em 15/07/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e — Notas Técnicas</a>
@@ -163,8 +212,8 @@
   <div id="convenio-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128220;</div>
-      <strong>Nenhum Convênio ICMS publicado em 16/07/2026.</strong><br>
-      <span style="font-size:12px;">Últimos convênios: ICMS 87 a 90/2026, publicados em 15/07/2026 (426ª Reunião Extraordinária do CONFAZ).</span>
+      <strong>Nenhum Convênio ICMS publicado em 19/07/2026 (domingo — sem DOU).</strong><br>
+      <span style="font-size:12px;">Últimos convênios publicados: ICMS 87 a 90/2026, publicados em 15/07/2026 (426ª Reunião Extraordinária do CONFAZ).</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">CONFAZ — Convênios ICMS</a>
@@ -175,8 +224,8 @@
   <div id="in-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128209;</div>
-      <strong>Nenhuma Instrução Normativa publicada em 16/07/2026.</strong><br>
-      <span style="font-size:12px;">Última IN: RFB nº 2.336/2026, publicada em 15/07/2026 (restituição automática IRPF 2025).</span>
+      <strong>Nenhuma Instrução Normativa publicada em 19/07/2026 (domingo — sem DOU).</strong><br>
+      <span style="font-size:12px;">Última IN publicada: RFB nº 2.336/2026 (restituição automática IRPF 2025), publicada em 15/07/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas Receita Federal</a>
@@ -185,50 +234,13 @@
 
   <!-- PORTARIAS -->
   <div id="portaria-tab" class="section">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria RFB</span> ALF/STS n° 208, de 15/07/2026 — Alfândega Porto de Santos</span>
-        <span class="card-date">16/07/2026</span>
-      </div>
-      <div class="card-body">
-        <p><strong>Órgão:</strong> Receita Federal do Brasil — Alfândega da RFB do Porto de Santos &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 16/07/2026</p>
-        <p>Altera a Portaria ALF/STS n° 7, de 28/01/2021, que dispõe sobre a organização interna da Alfândega da Receita Federal do Brasil no Porto de Santos/SP, tratando de atribuições e competências dos setores internos.</p>
-        <p>Empresas com operações de importação e exportação via Porto de Santos devem verificar eventuais impactos nos fluxos de atendimento, prazos e responsáveis por cada etapa do despacho aduaneiro.</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-alf/sts-n-208-de-15-de-julho-de-2026-719514101" target="_blank">DOU Oficial</a>
-      </div>
+    <div class="empty">
+      <div class="empty-icon">&#128193;</div>
+      <strong>Nenhuma Portaria publicada em 19/07/2026 (domingo — sem DOU).</strong><br>
+      <span style="font-size:12px;">Últimas portarias da semana: ALF/STS 208/2026 e SECEX 523/2026, publicadas em 16/07/2026.</span>
     </div>
-
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria SECEX</span> nº 523, de 15/07/2026 — Certificados de origem (atuação nacional)</span>
-        <span class="card-date">16/07/2026</span>
-      </div>
-      <div class="card-body">
-        <p><strong>Órgão:</strong> Secretaria de Comércio Exterior — MDIC &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 16/07/2026</p>
-        <p>Altera a Portaria SECEX nº 249, de 04/07/2023, para permitir a atuação em âmbito <strong>nacional</strong> das entidades de classe expressamente autorizadas a emitir certificados de origem — anteriormente com restrições territoriais.</p>
-        <p>Certificados de origem são documentos que comprovam a procedência de mercadorias e são exigidos para usufruir de preferências tarifárias em acordos comerciais (ex: TEC, MERCOSUL, ACE, acordos bilaterais). A mudança facilita o acesso das empresas em todo o território nacional a entidades emissoras credenciadas.</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/portaria-secex-n-523-de-15-de-julho-de-2026-719509797" target="_blank">DOU Oficial</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="tag tag-dec">Decreto</span> nº 13.065, de 15/07/2026 — Programa Brasil Semicondutores (PADIS)</span>
-        <span class="card-date">16/07/2026</span>
-      </div>
-      <div class="card-body">
-        <p><strong>Órgão:</strong> Presidência da República &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 16/07/2026</p>
-        <p>Altera o Decreto nº 10.615, de 29/01/2021 (PADIS), para regulamentar o art. 3° da Lei nº 14.968, de 11/09/2024, instituindo o <strong>Programa Brasil Semicondutores</strong>.</p>
-        <p>O PADIS concede benefícios fiscais (desoneração de IPI, PIS/COFINS, CIDE-Tecnologia) a empresas fabricantes de semicondutores, displays e LEDs. O decreto atualiza as regras e amplia o escopo com o novo programa Br-Semicondutores, no contexto da política industrial de alta tecnologia.</p>
-        <p><strong>Impacto fiscal:</strong> Empresas do setor de microeletrônica, fotônica e equipamentos de comunicação devem verificar as novas condições de acesso e manutenção dos benefícios fiscais.</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/decreto-n-13.065-de-15-de-julho-de-2026-719521081" target="_blank">DOU Oficial</a>
-      </div>
+    <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
+      <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas Receita Federal</a>
     </div>
   </div>
 
@@ -236,7 +248,7 @@
   <div id="sc-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128172;</div>
-      <strong>Nenhuma Solução de Consulta identificada especificamente em 16/07/2026.</strong><br>
+      <strong>Nenhuma Solução de Consulta publicada em 19/07/2026 (domingo — sem DOU).</strong><br>
       <span style="font-size:12px;">Última SC: Cosit nº 98.169/2026 (classificação NCM), publicada em 15/07/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
@@ -246,6 +258,15 @@
 
   <!-- HISTÓRICO -->
   <div id="historico-tab" class="section">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 19/07/2026 (domingo) <span class="hist-count">(0 publicações — DOU não publicado aos domingos)</span></span>
+      </div>
+      <div class="card-body">
+        <p style="color:#8899aa;font-size:13px;">Sem publicações oficiais. O Diário Oficial da União não circula aos domingos.</p>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-header">
