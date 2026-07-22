@@ -1,0 +1,426 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Atualizacao Tributaria Diaria",
+  "schemaVersion": 1,
+  "description": "Site de monitoramento diário de publicações tributárias brasileiras: Receita Federal, Portal NF-e, CONFAZ, CGIBS e IOB. Atualizado automaticamente toda manhã pela tarefa agendada `atualizao_tributria`.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualização Tributária Diária</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; font-size: 14px; background: #f0f4f8; color: #1a2636; }
+  .header { background: linear-gradient(135deg, #002855 0%, #0053a0 100%); color: #fff; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header-left p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+  .badge-data { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .tabs { display: flex; gap: 2px; background: #dbe5f0; padding: 6px 20px 0; overflow-x: auto; }
+  .tab { padding: 8px 18px; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 13px; font-weight: 600; color: #4a6080; background: transparent; border: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
+  .tab:hover { background: rgba(255,255,255,0.6); }
+  .tab.active { background: #f0f4f8; color: #002855; }
+  .main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+  .resumo { background: #fff; border: 1px solid #c8daf0; border-left: 5px solid #0053a0; border-radius: 6px; padding: 14px 18px; margin-bottom: 18px; }
+  .resumo h2 { font-size: 13px; font-weight: 700; color: #002855; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .resumo-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+  .resumo-pill { background: #eef4fb; border: 1px solid #b8d0eb; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; color: #003a80; }
+  .resumo-pill span { font-weight: 400; color: #555; margin-left: 4px; }
+  .alerta-prazo { margin-top: 12px; background: #fff3e0; border: 1px solid #f5a623; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7a3c00; line-height: 1.6; }
+  .alerta-critico { margin-top: 8px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7f0000; line-height: 1.6; }
+  .alerta-destaque { margin-top: 12px; background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #1b5e20; line-height: 1.6; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: #fff; border-radius: 8px; border: 1px solid #dce7f3; margin-bottom: 14px; overflow: hidden; }
+  .card-header { background: #f4f8fd; border-bottom: 1px solid #dce7f3; padding: 10px 16px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+  .card-title { font-size: 13px; font-weight: 700; color: #002855; }
+  .card-date { font-size: 11px; color: #666; background: #e8eef7; border-radius: 12px; padding: 2px 10px; font-weight: 600; }
+  .card-body { padding: 14px 16px; line-height: 1.6; }
+  .card-body p { margin-bottom: 8px; font-size: 13px; }
+  .card-body ul { padding-left: 18px; margin-bottom: 8px; }
+  .card-body li { margin-bottom: 4px; font-size: 13px; }
+  .card-body strong { color: #002855; }
+  .card-footer { padding: 8px 16px; border-top: 1px solid #eef1f5; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #fafcff; }
+  .btn-link { display: inline-block; background: #0053a0; color: #fff; border-radius: 4px; padding: 4px 12px; font-size: 12px; text-decoration: none; font-weight: 600; transition: background 0.15s; }
+  .btn-link:hover { background: #003d7a; }
+  .btn-link.secondary { background: #5a7a9a; }
+  .tag { display: inline-block; border-radius: 3px; padding: 2px 8px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+  .tag-nt { background: #fff3e0; color: #b35c00; border: 1px solid #f0c070; }
+  .tag-conv { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
+  .tag-in { background: #f3e5f5; color: #6a1b9a; border: 1px solid #ba68c8; }
+  .tag-port { background: #e3f2fd; color: #0d47a1; border: 1px solid #64b5f6; }
+  .tag-sc { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
+  .tag-dec { background: #e0f2f1; color: #004d40; border: 1px solid #4db6ac; }
+  .tag-cgibs { background: #ede7f6; color: #4527a0; border: 1px solid #9575cd; }
+  .tag-cfc { background: #fbe9e7; color: #bf360c; border: 1px solid #ffab91; }
+  .tag-edit { background: #e8eaf6; color: #283593; border: 1px solid #7986cb; }
+  .empty { text-align: center; padding: 40px 20px; color: #8899aa; font-size: 13px; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .footer { text-align: center; padding: 16px; font-size: 11px; color: #8899aa; }
+  .footer a { color: #0053a0; }
+  .sources-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .source-chip { background: #eef4fb; border: 1px solid #c0d8f0; border-radius: 4px; padding: 4px 10px; font-size: 11px; }
+  .source-chip a { color: #003a80; text-decoration: none; font-weight: 600; }
+  .hist-date { font-size: 13px; font-weight: 700; color: #002855; }
+  .hist-count { font-size: 11px; color: #5a7a9a; margin-left: 8px; font-weight: 400; }
+  .countdown { display: inline-block; background: #d32f2f; color: #fff; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-left: 6px; }
+  .countdown-warn { background: #f57f17; }
+  .countdown-ok { background: #388e3c; }
+  .card-highlight { border-left: 4px solid #f57f17; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>&#9878;&#65039; Atualização Tributária Diária</h1>
+    <p>Monitoramento de normas: Receita Federal · CGIBS · Portal NF-e · CONFAZ · IOB</p>
+  </div>
+  <div class="badge-data">&#128197; Ref.: 21/07/2026 · Atualizado: 22/07/2026</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('resumo-tab', this)">&#128203; Resumo</button>
+  <button class="tab" onclick="showTab('nt-tab', this)">&#128196; Notas Técnicas</button>
+  <button class="tab" onclick="showTab('convenio-tab', this)">&#128220; Convênios ICMS</button>
+  <button class="tab" onclick="showTab('in-tab', this)">&#128209; Instruções Normativas</button>
+  <button class="tab" onclick="showTab('portaria-tab', this)">&#128193; Portarias</button>
+  <button class="tab" onclick="showTab('sc-tab', this)">&#128172; Soluções de Consulta</button>
+  <button class="tab" onclick="showTab('historico-tab', this)">&#128336; Histórico</button>
+</div>
+
+<div class="main">
+
+  <!-- ======= RESUMO ======= -->
+  <div id="resumo-tab" class="section active">
+
+    <div class="resumo">
+      <h2>&#128204; Publicações e Destaques de 21/07/2026</h2>
+      <div class="resumo-grid">
+        <div class="resumo-pill">Notas Técnicas <span>1</span></div>
+        <div class="resumo-pill">Convênios ICMS <span>0</span></div>
+        <div class="resumo-pill">Instruções Normativas <span>0</span></div>
+        <div class="resumo-pill">Portarias / Atos <span>2</span></div>
+        <div class="resumo-pill">Soluções de Consulta <span>0</span></div>
+        <div class="resumo-pill">Outros destaques <span>3</span></div>
+      </div>
+
+      <div class="alerta-critico">
+        &#128680; <strong>ALERTA — Possível adiamento da obrigatoriedade IBS/CBS nas NF-e:</strong><br>
+        O Governo Federal e o Comitê Gestor do IBS (CGIBS) estão estudando <strong>adiar por pelo menos mais um mês</strong> a obrigatoriedade sistêmica de preenchimento dos campos IBS/CBS nos documentos fiscais eletrônicos, atualmente prevista para <strong>03/08/2026</strong>. A decisão depende de um cronograma a ser divulgado <strong>até o fim de julho</strong>. Empresas e desenvolvedores devem manter o ritmo de adequação independentemente do adiamento.
+      </div>
+
+      <div class="alerta-prazo">
+        &#9888;&#65039; <strong>PRAZOS DA REFORMA TRIBUTÁRIA:</strong><br>
+        <strong>31/07/2026</strong> <span class="countdown">10 dias</span> — Último dia do período <em>facultativo</em> de preenchimento dos campos IBS/CBS nos DFe. Após essa data, os documentos sem os campos poderão ser rejeitados automaticamente (salvo adiamento ainda em discussão).<br>
+        <strong>03/08/2026</strong> <span class="countdown">13 dias</span> — Início previsto da <strong>obrigatoriedade sistêmica</strong> para contribuintes do regime regular (CRT 3=Normal). Alíquota-teste de 1% (0,1% IBS + 0,9% CBS) — <em>sujeito a possível prorrogação</em>.
+      </div>
+
+      <div class="alerta-destaque">
+        &#10004;&#65039; <strong>CFC — Orientação Técnica nº 1/2026 publicada:</strong><br>
+        O Conselho Federal de Contabilidade publicou em 20/07/2026 a <strong>Orientação Técnica CFC nº 1/2026</strong>, com diretrizes para o tratamento contábil do IBS e da CBS — reconhecimento, mensuração, apresentação e evidenciação nas demonstrações contábeis. IBS e CBS <strong>não integram a receita</strong> da entidade (cobrados "por fora"). Relevante para empresas que precisam parametrizar ERPs e definir políticas contábeis.
+      </div>
+    </div>
+
+    <!-- Card 1: NT EPEC -->
+    <div class="card card-highlight">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-nt">NT NF-e</span> Nota Técnica 2014.001 v.1.40 — Nova regra EPEC (contingência) para PR e PB</span>
+        <span class="card-date">15/07/2026 (notícia 21/07)</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> ENCAT / Receita Federal &nbsp;|&nbsp; <strong>Ajuste base:</strong> SINIEF nº 25/2026</p>
+        <p>Atualização da regra de validação <strong>2P10-20</strong> do Evento Prévio de Emissão em Contingência (EPEC): a partir de <strong>05/10/2026</strong>, contribuintes vinculados à SEFAZ-PR (Paraná) e SEFAZ-PB (Paraíba) ficam impedidos de utilizar o EPEC para autorização de NF-e em contingência.</p>
+        <ul>
+          <li>Impacta empresas com operações nesses estados que usam o EPEC como alternativa de contingência</li>
+          <li>Desenvolvedores de software fiscal devem atualizar as regras de validação antes de 05/10/2026</li>
+          <li>Implementação restrita ao ambiente de produção (data: 05/10/2026)</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e — Notas Técnicas</a>
+        <a class="btn-link secondary" href="https://www.contadores.cnt.br/noticias/tecnicas/2026/07/21/nf-e-tera-nova-regra-para-emissao-em-contingencia-a-partir-de-outubro.html" target="_blank">Notícia Contadores.cnt.br</a>
+      </div>
+    </div>
+
+    <!-- Card 2: Possível adiamento IBS/CBS -->
+    <div class="card card-highlight">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-cgibs">CGIBS/RFB</span> Governo e Comitê Gestor estudam adiar obrigatoriedade IBS/CBS nas notas fiscais</span>
+        <span class="card-date">20-21/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fonte:</strong> Jota / Contadores.cnt.br / Molina Advogados</p>
+        <p>O governo federal e o CGIBS estão em negociação para adiar o início da obrigatoriedade sistêmica dos campos IBS/CBS nos documentos fiscais eletrônicos, atualmente prevista para <strong>03/08/2026</strong>. A tendência é de prorrogação de pelo menos 1 mês, mas a decisão depende de cronograma a ser divulgado até o fim de julho.</p>
+        <ul>
+          <li>Sem o preenchimento correto dos campos, as notas serão rejeitadas automaticamente (sistema rejeita documentos incompletos)</li>
+          <li>Principal risco: interrupção do faturamento e da cadeia produtiva para PMEs não adaptadas</li>
+          <li>Entidades de TI (AFRAC, ABES, BRASSCOM) enviaram ofício ao Ministério da Fazenda em 16/07 pedindo harmonização das normas CBS/IBS</li>
+          <li>Mesmo que o prazo seja adiado, a recomendação é manter as adequações em andamento</li>
+          <li>Simples Nacional: obrigatoriedade prevista apenas para <strong>01/01/2027</strong></li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link secondary" href="https://www.contadores.cnt.br/noticias/tecnicas/2026/07/20/governo-e-comite-gestor-estudam-adiar-obrigacao-de-destaque-de-ibs-cbs.html" target="_blank">Contadores.cnt.br</a>
+        <a class="btn-link secondary" href="https://molina.adv.br/2026/07/reforma-tributaria-possivel-adiamento-da-obrigatoriedade-de-destaque-de-ibs-e-cbs-nas-notas-fiscais-e-os-riscos-operacionais-da-transicao/" target="_blank">Molina Advogados</a>
+        <a class="btn-link secondary" href="https://www.cgibs.gov.br/novo-marco-da-reforma-tributaria-inicia-em-03-de-agosto-com-preenchimento-obrigatorio-dos-campos-relativos-ao-ibs-e-a-cbs" target="_blank">CGIBS</a>
+      </div>
+    </div>
+
+    <!-- Card 3: CFC Orientação Técnica -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-cfc">CFC</span> Orientação Técnica nº 1/2026 — Tratamento contábil do IBS e CBS</span>
+        <span class="card-date">20/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Conselho Federal de Contabilidade (CFC) &nbsp;|&nbsp; <strong>Publicação:</strong> 20/07/2026</p>
+        <p>Documento técnico com diretrizes para reconhecimento, mensuração, apresentação e evidenciação do IBS e da CBS nas demonstrações contábeis durante a fase de transição da Reforma Tributária.</p>
+        <ul>
+          <li><strong>IBS e CBS não integram receita</strong> — possuem natureza de tributos não cumulativos cobrados "por fora"</li>
+          <li>Orientações sobre registro de créditos fiscais e reconhecimento do passivo tributário</li>
+          <li>Capítulo específico sobre o período de testes de 2026 (destaques sem recolhimento efetivo)</li>
+          <li>Modalidades de extinção: compensação com créditos, pagamento, split payment, RAD (Recolhimento pelo Adquirente), pagamento por terceiro responsável</li>
+          <li>Caráter técnico — não substitui normas contábeis vigentes nem cria novas obrigações legais</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://cfc.org.br/wp-content/uploads/2026/07/CFC_Orientacao_Tecnica.pdf" target="_blank">Íntegra (PDF) — CFC</a>
+        <a class="btn-link secondary" href="https://www.contadores.cnt.br/noticias/tecnicas/2026/07/21/cfc-publica-orientacao-tecnica-sobre-contabilizacao-de-ibs-e-cbs.html" target="_blank">Notícia</a>
+      </div>
+    </div>
+
+    <!-- Card 4: Editais de Transação RFB -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-edit">Edital RFB</span> Editais de Transação nº 9 e nº 10/2026 — Débitos em contencioso administrativo</span>
+        <span class="card-date">13/07/2026 (notícia 21/07)</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> Receita Federal do Brasil &nbsp;|&nbsp; <strong>Prazo de adesão:</strong> 30/10/2026</p>
+        <p>A Receita Federal publicou dois editais de transação para regularização de débitos tributários em contencioso administrativo:</p>
+        <ul>
+          <li><strong>Edital nº 9:</strong> Débitos em contencioso administrativo fiscal de <em>até R$ 50 milhões</em> por processo. Para PF e PJ. Descontos de até <strong>65% (70%</strong> para PF, MEIs, EPPs, Santas Casas e cooperativas). Opções de parcelamento ampliado e uso de créditos de prejuízo fiscal / base negativa de CSLL.</li>
+          <li><strong>Edital nº 10:</strong> Débitos de <em>pequeno valor</em> (até 60 salários-mínimos por processo). Para PF, MEIs, empresários individuais, MEs e EPPs. Descontos progressivos conforme número de parcelas.</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link secondary" href="https://molina.adv.br/2026/07/receita-federal-publica-novos-editais-de-transacao-tributaria-para-debitos-em-contencioso-administrativo/" target="_blank">Análise Molina Advogados</a>
+        <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
+      </div>
+    </div>
+
+    <!-- Card 5: Portaria COANA 199 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-port">Portaria</span> COANA nº 199, de 03/07/2026 — Trânsito simplificado remessas expressas (devolução)</span>
+        <span class="card-date">Publicada DOU: 21/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> COANA/RFB — Coord.-Geral de Administração Aduaneira</p>
+        <p>Altera a Portaria COANA nº 192, de 13 de maio de 2026, que disciplina o trânsito simplificado de saída do país de remessas expressas em devolução ao exterior. Relevante para empresas de e-commerce internacional e despachantes aduaneiros.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link secondary" href="https://www.in.gov.br/en/web/dou/-/portaria-coana-n-199-de-3-de-julho-de-2026-720477148" target="_blank">DOU — Portaria COANA 199</a>
+      </div>
+    </div>
+
+    <!-- Card 6: ADE COANA 55 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-dec">ADE</span> COANA nº 55, de 16/07/2026 — Mediana p/ crédito tributário mercadoria importada extraviada</span>
+        <span class="card-date">Publicado DOU: 21/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> COANA/RFB &nbsp;|&nbsp; <strong>Base legal:</strong> Art. 67 da Lei nº 10.833/2003</p>
+        <p>Divulga o valor da mediana, em reais, para lançamento no <strong>2º semestre de 2026</strong> do crédito tributário relativo à mercadoria importada que tenha sido extraviada ou consumida. Relevante para operadores de comércio exterior com ocorrências de extravio aduaneiro.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link secondary" href="https://www.in.gov.br/web/dou/-/ato-declaratorio-executivo-coana-n-55-de-16-de-julho-de-2026-720507223" target="_blank">DOU — ADE COANA 55</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======= NOTAS TÉCNICAS ======= -->
+  <div id="nt-tab" class="section">
+    <div class="card card-highlight">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-nt">NT NF-e</span> 2014.001 v.1.40 — Alteração do EPEC: restrição para contribuintes de PR e PB</span>
+        <span class="card-date">Publicada: 15/07/2026 | Produção: 05/10/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Tipo:</strong> Nota Técnica NF-e &nbsp;|&nbsp; <strong>Base normativa:</strong> Ajuste SINIEF nº 25/2026</p>
+        <p>A versão 1.40 da NT 2014.001 altera a <strong>regra de validação 2P10-20</strong> do EPEC (Evento Prévio de Emissão em Contingência). A partir de <strong>05/10/2026</strong>, o sistema rejeitará automaticamente o evento para contribuintes cuja administração tributária seja a SEFAZ-PR ou SEFAZ-PB.</p>
+        <p><strong>Impactos práticos:</strong></p>
+        <ul>
+          <li>Empresas com estabelecimentos no PR ou PB que utilizam EPEC para emissão em contingência devem buscar alternativas (FS-DA, SCAN)</li>
+          <li>Desenvolvedores de ERP e software fiscal devem atualizar as regras de validação antes de 05/10/2026</li>
+          <li>A mudança é decorrente do Ajuste SINIEF nº 25/2026, aprovado pelo CONFAZ</li>
+          <li>Também foram atualizados: histórico de versões, procedimentos de processamento do EPEC e regras técnicas relacionadas</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e — Notas Técnicas</a>
+        <a class="btn-link secondary" href="https://www.contadores.cnt.br/noticias/tecnicas/2026/07/21/nf-e-tera-nova-regra-para-emissao-em-contingencia-a-partir-de-outubro.html" target="_blank">Notícia completa</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= CONVÊNIOS ICMS ======= -->
+  <div id="convenio-tab" class="section">
+    <div class="empty">
+      <div class="empty-icon">&#128220;</div>
+      <strong>Nenhum Convênio ICMS publicado em 21/07/2026.</strong><br>
+      <span style="font-size:12px;">Últimos convênios publicados: ICMS 87 a 90/2026 — publicados em 15/07/2026 (426ª Reunião Extraordinária do CONFAZ). Conv. 89 e 90: SP sai dos regimes de ST de tintas/vernizes e pneus/borracha. Conv. 87 e 88: prorrogações de benefícios até 31/12/2026.</span>
+    </div>
+    <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
+      <a class="btn-link secondary" href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">CONFAZ — Convênios ICMS</a>
+    </div>
+  </div>
+
+  <!-- ======= INSTRUÇÕES NORMATIVAS ======= -->
+  <div id="in-tab" class="section">
+    <div class="empty">
+      <div class="empty-icon">&#128209;</div>
+      <strong>Nenhuma Instrução Normativa da RFB publicada em 21/07/2026.</strong><br>
+      <span style="font-size:12px;">As publicações do DOU de 21/07 foram restritas a atos aduaneiros (COANA). Última IN relevante: RFB nº 2.336/2026 (restituição automática IRPF 2025), publicada em 15/07/2026.</span>
+    </div>
+    <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
+      <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas Receita Federal</a>
+    </div>
+  </div>
+
+  <!-- ======= PORTARIAS ======= -->
+  <div id="portaria-tab" class="section">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-port">Portaria</span> COANA nº 199, de 03/07/2026 — Trânsito simplificado de remessas expressas em devolução ao exterior</span>
+        <span class="card-date">DOU: 21/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> COANA / Secretaria Especial da Receita Federal do Brasil</p>
+        <p>Altera a Portaria COANA nº 192, de 13 de maio de 2026, que disciplina o trânsito simplificado de saída do país de remessas expressas em devolução ao exterior. A alteração impacta o processo aduaneiro de devoluções de e-commerce e importações por remessa expressa (courier).</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/en/web/dou/-/portaria-coana-n-199-de-3-de-julho-de-2026-720477148" target="_blank">DOU — Portaria COANA 199/2026</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="tag tag-dec">ADE</span> COANA nº 55, de 16/07/2026 — Valor da mediana para crédito tributário de mercadoria importada extraviada ou consumida</span>
+        <span class="card-date">DOU: 21/07/2026</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Órgão:</strong> COANA / RFB &nbsp;|&nbsp; <strong>Base legal:</strong> Art. 67 da Lei nº 10.833/2003</p>
+        <p>Divulga o valor da mediana, em reais, para utilização no lançamento, no 2º semestre de 2026, do crédito tributário relativo à mercadoria importada que tenha sido extraviada ou consumida. Aplicável a situações de extravio aduaneiro em que o importador fica obrigado ao recolhimento dos tributos incidentes na importação.</p>
+      </div>
+      <div class="card-footer">
+        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/ato-declaratorio-executivo-coana-n-55-de-16-de-julho-de-2026-720507223" target="_blank">DOU — ADE COANA 55/2026</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======= SOLUÇÕES DE CONSULTA ======= -->
+  <div id="sc-tab" class="section">
+    <div class="empty">
+      <div class="empty-icon">&#128172;</div>
+      <strong>Nenhuma Solução de Consulta publicada em 21/07/2026.</strong><br>
+      <span style="font-size:12px;">Última SC: Cosit nº 98.169/2026 (classificação NCM), publicada em 15/07/2026.</span>
+    </div>
+    <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
+      <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action?facetsExistentes=&orgaosSelecionados=Cosit&tiposAtosSelecionados=72&lblTiposAtosSelecionados=SC" target="_blank">Soluções de Consulta — Normas RFB</a>
+    </div>
+  </div>
+
+  <!-- ======= HISTÓRICO ======= -->
+  <div id="historico-tab" class="section">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 21/07/2026 (terça-feira) <span class="hist-count">(6 itens — portarias, NT e destaques Reforma Tributária)</span></span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><span class="tag tag-port">Port.</span> Portaria COANA 199/2026 — Trânsito simplificado remessas expressas devolução ao exterior (DOU 21/07)</li>
+          <li><span class="tag tag-dec">ADE</span> ADE COANA 55/2026 — Mediana crédito tributário mercadoria importada extraviada (DOU 21/07)</li>
+          <li><span class="tag tag-nt">NT</span> NT 2014.001 v.1.40 (publi. 15/07) — EPEC: restrição PR/PB a partir de 05/10/2026 · Ajuste SINIEF 25/2026 (amplamente noticiada em 21/07)</li>
+          <li><span class="tag tag-cfc">CFC</span> Orientação Técnica CFC nº 1/2026 — Tratamento contábil IBS e CBS (publi. 20/07, noticiada 21/07)</li>
+          <li><span class="tag tag-cgibs">CGIBS</span> Governo e CGIBS estudam adiar obrigatoriedade IBS/CBS (prazo 03/08) por pelo menos 1 mês (notícia 20-21/07)</li>
+          <li><span class="tag tag-edit">Edital</span> Editais de Transação RFB 9 e 10/2026 (publi. 13/07, noticiados 21/07) — Contencioso adm. · Prazo adesão: 30/10/2026</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 19/07/2026 (domingo) <span class="hist-count">(0 publicações — DOU não publicado aos domingos)</span></span>
+      </div>
+      <div class="card-body">
+        <p style="color:#8899aa;font-size:13px;">Sem publicações oficiais. O Diário Oficial da União não circula aos domingos.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 16/07/2026 (quinta-feira) <span class="hist-count">(3 publicações — volume baixo)</span></span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><span class="tag tag-port">Port.</span> Portaria ALF/STS 208/2026 — Organização interna Alfândega Porto de Santos (RFB)</li>
+          <li><span class="tag tag-port">Port.</span> Portaria SECEX 523/2026 — Certificados de origem: atuação nacional (MDIC)</li>
+          <li><span class="tag tag-dec">Dec.</span> Decreto 13.065/2026 — Programa Brasil Semicondutores (PADIS) (Presidência)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 15/07/2026 (quarta-feira) <span class="hist-count">(8 publicações)</span></span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><span class="tag tag-nt">NT</span> Nota Técnica 2014.001 v.1.40 — EPEC: restrição PR/PB a partir de 05/10/2026 (Portal NF-e)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 87/2026 — BC ICMS pneus/câmaras, prorrogação até 31/12/2026 (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 88/2026 — Dedução PIS/COFINS Lei 10.147/00, prorrogação até 31/12/2026 (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 89/2026 — SP sai da ST de tintas e vernizes (CONFAZ)</li>
+          <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 90/2026 — SP sai da ST de pneus/borracha (CONFAZ)</li>
+          <li><span class="tag tag-in">IN</span> IN RFB 2.336/2026 — Restituição automática IRPF exercício 2025 (Receita Federal)</li>
+          <li><span class="tag tag-port">Port.</span> Portaria SECEX 522/2026 — Cotas importação NCM 8541.43.00 (MDIC, Extra A)</li>
+          <li><span class="tag tag-sc">SC</span> SC Cosit 98.169/2026 — Classificação mercadorias 7 NCMs (Receita Federal)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="empty" style="padding:20px;font-size:12px;">Dias anteriores a 15/07/2026 serão adicionados automaticamente a cada atualização diária.</div>
+  </div>
+
+  <div class="footer">
+    Fontes monitoradas:
+    <div class="sources-list" style="justify-content:center;margin-top:6px;">
+      <span class="source-chip"><a href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">normas.receita.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.nfe.fazenda.gov.br/portal/principal.aspx" target="_blank">nfe.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">confaz.fazenda.gov.br</a></span>
+      <span class="source-chip"><a href="https://www.cgibs.gov.br/inicial" target="_blank">cgibs.gov.br</a></span>
+      <span class="source-chip"><a href="https://noticias.iob.com.br/reforma-tributaria/" target="_blank">noticias.iob.com.br</a></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
