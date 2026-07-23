@@ -1,12 +1,4 @@
-<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
-{
-  "name": "Atualizacao Tributaria Diaria",
-  "schemaVersion": 1,
-  "description": "Site de monitoramento diário de publicações tributárias brasileiras: Receita Federal, Portal NF-e, CONFAZ, CGIBS e IOB. Atualizado automaticamente toda manhã pela tarefa agendada `atualizao_tributria`.",
-  "mcpTools": [],
-  "mcpServerNames": []
-}
-</script>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -32,7 +24,8 @@
   .resumo-pill span { font-weight: 400; color: #555; margin-left: 4px; }
   .alerta-prazo { margin-top: 12px; background: #fff3e0; border: 1px solid #f5a623; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7a3c00; line-height: 1.6; }
   .alerta-critico { margin-top: 8px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #7f0000; line-height: 1.6; }
-  .alerta-info { margin-top: 8px; background: #e3f2fd; border: 1px solid #90caf9; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #0d47a1; line-height: 1.6; }
+  .alerta-destaque { margin-top: 12px; background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #1b5e20; line-height: 1.6; }
+  .alerta-info { margin-top: 12px; background: #e3f2fd; border: 1px solid #90caf9; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #0d47a1; line-height: 1.6; }
   .section { display: none; }
   .section.active { display: block; }
   .card { background: #fff; border-radius: 8px; border: 1px solid #dce7f3; margin-bottom: 14px; overflow: hidden; }
@@ -56,12 +49,13 @@
   .tag-sc { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
   .tag-dec { background: #e0f2f1; color: #004d40; border: 1px solid #4db6ac; }
   .tag-cgibs { background: #ede7f6; color: #4527a0; border: 1px solid #9575cd; }
-  .tag-circ { background: #f1f8e9; color: #33691e; border: 1px solid #aed581; }
+  .tag-cfc { background: #fbe9e7; color: #bf360c; border: 1px solid #ffab91; }
+  .tag-edit { background: #e8eaf6; color: #283593; border: 1px solid #7986cb; }
   .empty { text-align: center; padding: 40px 20px; color: #8899aa; font-size: 13px; }
   .empty-icon { font-size: 32px; margin-bottom: 8px; }
   .footer { text-align: center; padding: 16px; font-size: 11px; color: #8899aa; }
   .footer a { color: #0053a0; }
-  .sources-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
+  .sources-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   .source-chip { background: #eef4fb; border: 1px solid #c0d8f0; border-radius: 4px; padding: 4px 10px; font-size: 11px; }
   .source-chip a { color: #003a80; text-decoration: none; font-weight: 600; }
   .hist-date { font-size: 13px; font-weight: 700; color: #002855; }
@@ -69,6 +63,9 @@
   .countdown { display: inline-block; background: #d32f2f; color: #fff; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-left: 6px; }
   .countdown-warn { background: #f57f17; }
   .countdown-ok { background: #388e3c; }
+  .card-highlight { border-left: 4px solid #f57f17; }
+  .card-highlight-red { border-left: 4px solid #d32f2f; }
+  .card-highlight-green { border-left: 4px solid #388e3c; }
 </style>
 </head>
 <body>
@@ -78,7 +75,7 @@
     <h1>&#9878;&#65039; Atualização Tributária Diária</h1>
     <p>Monitoramento de normas: Receita Federal · CGIBS · Portal NF-e · CONFAZ · IOB</p>
   </div>
-  <div class="badge-data">&#128197; Ref.: 21/07/2026 · Atualizado: 22/07/2026</div>
+  <div class="badge-data">&#128197; Ref.: 22/07/2026 · Atualizado: 23/07/2026</div>
 </div>
 
 <div class="tabs">
@@ -86,153 +83,140 @@
   <button class="tab" onclick="showTab('nt-tab', this)">&#128196; Notas Técnicas</button>
   <button class="tab" onclick="showTab('convenio-tab', this)">&#128220; Convênios ICMS</button>
   <button class="tab" onclick="showTab('in-tab', this)">&#128209; Instruções Normativas</button>
-  <button class="tab" onclick="showTab('portaria-tab', this)">&#128193; Portarias</button>
+  <button class="tab" onclick="showTab('portaria-tab', this)">&#128193; Portarias / Decretos</button>
   <button class="tab" onclick="showTab('sc-tab', this)">&#128172; Soluções de Consulta</button>
   <button class="tab" onclick="showTab('historico-tab', this)">&#128336; Histórico</button>
 </div>
 
 <div class="main">
 
-  <!-- RESUMO -->
+  <!-- ======= RESUMO ======= -->
   <div id="resumo-tab" class="section active">
 
     <div class="resumo">
-      <h2>&#128204; Publicações de 21/07/2026 (DOU — Terça-feira)</h2>
+      <h2>&#128204; Publicações de 22/07/2026</h2>
       <div class="resumo-grid">
         <div class="resumo-pill">Notas Técnicas <span>0</span></div>
         <div class="resumo-pill">Convênios ICMS <span>0</span></div>
         <div class="resumo-pill">Instruções Normativas <span>0</span></div>
-        <div class="resumo-pill">Portarias <span>1</span></div>
+        <div class="resumo-pill">Portarias / Decretos <span>1</span></div>
         <div class="resumo-pill">Soluções de Consulta <span>0</span></div>
-        <div class="resumo-pill">Atos Declaratórios / Circulares <span>2</span></div>
       </div>
 
-      <div class="alerta-critico">
-        &#128680; <strong>PRAZO CRÍTICO — Reforma Tributária IBS/CBS:</strong><br>
-        <strong>31/07/2026</strong> <span class="countdown">9 dias</span> — Último dia do período facultativo de preenchimento dos campos IBS/CBS/IS nos DFe (NF-e, NFC-e, CT-e, MDF-e). A partir de 01/08, qualquer DFe sem os campos pode ser rejeitado.<br>
-        <strong>03/08/2026</strong> <span class="countdown">12 dias</span> — Início da <strong>obrigatoriedade sistêmica</strong> para contribuintes do regime regular (CRT 3). Documentos sem IBS/CBS serão automaticamente <strong>rejeitados pelo sistema autorizador</strong>. Alíquota de teste: 1% (0,1% IBS + 0,9% CBS). Base: NT 2025.002 v.1.40.
+      <div class="alerta-destaque">
+        &#9989; <strong>NOVIDADE — Decreto nº 13.075/2026 (DOU 22/07):</strong><br>
+        O Governo Federal publicou o <strong>Decreto nº 13.075, de 21 de julho de 2026</strong>, que adia para <strong>1º de janeiro de 2027</strong> a obrigatoriedade de inscrição no CNPJ e de emissão de notas fiscais com destaque de CBS para <strong>pessoas físicas contribuintes da CBS e produtores rurais pessoas físicas</strong>.<br>
+        <strong>Importante:</strong> O decreto <u>não altera</u> o prazo de 03/08/2026 para <strong>empresas (CNPJ).</strong>
       </div>
 
       <div class="alerta-prazo">
-        &#9888;&#65039; <strong>Manutenção Programada — Portal Único Siscomex:</strong><br>
-        O Portal Único Siscomex ficará <strong>indisponível entre 25/07/2026 (sexta) e 27/07/2026 (domingo)</strong> <span class="countdown countdown-warn">3 dias</span> para manutenção técnica. Planeje antecipadamente despachos e registros de importação/exportação para essa janela. (Comunicado GRUAIRPORT nº 09/2026).
+        &#9888;&#65039; <strong>PRAZOS DA REFORMA TRIBUTÁRIA:</strong><br>
+        <strong>31/07/2026</strong> <span class="countdown countdown-warn">8 dias</span> — Último dia do período <em>facultativo</em> de preenchimento dos campos IBS/CBS nos DFe.<br>
+        <strong>03/08/2026</strong> <span class="countdown">11 dias</span> — Início da <strong>obrigatoriedade sistêmica</strong> para contribuintes PJ (regime regular, CRT 3=Normal). Alíquota-teste de 1% (0,1% IBS + 0,9% CBS).<br>
+        <strong>01/01/2027</strong> <span class="countdown countdown-ok">confirmado</span> — Obrigatoriedade para <strong>pessoas físicas contribuintes e produtores rurais PF</strong> (Decreto 13.075/2026).
+      </div>
+
+      <div class="alerta-info">
+        &#128161; <strong>CNPJ Alfanumérico — impactos operacionais em curso:</strong><br>
+        O SINDASP reportou em 22/07/2026 que está monitorando os <strong>impactos imediatos da implantação do CNPJ Alfanumérico</strong> nos sistemas de comércio exterior, com recomendações relevantes para Despachantes Aduaneiros. Empresas que utilizam CNPJ em campos alfanuméricos de NF-e/CT-e devem verificar a compatibilidade dos seus sistemas ERP.
       </div>
     </div>
 
-    <p style="font-size:12px;color:#6a7f9a;margin-bottom:14px;padding:0 4px;">
-      &#128337; O DOU de 21/07/2026 (terça-feira) apresentou volume baixo de publicações tributárias específicas. Os atos publicados são de natureza aduaneira (COANA/SECEX). Não foram publicadas INs, NTs NF-e, Convênios ICMS ou Soluções de Consulta nesta data.
-    </p>
-
-    <!-- Portaria COANA -->
-    <div class="card">
+    <!-- Card principal: Decreto 13.075 -->
+    <div class="card card-highlight-green">
       <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria</span> COANA Nº 199/2026 — Trânsito simplificado de remessas expressas em devolução ao exterior</span>
-        <span class="card-date">DOU 21/07/2026</span>
+        <span class="card-title"><span class="tag tag-dec">Decreto</span> nº 13.075, de 21/07/2026 — Adia para 2027 obrigações da CBS para pessoas físicas e produtores rurais</span>
+        <span class="card-date">DOU: 22/07/2026</span>
       </div>
       <div class="card-body">
-        <p><strong>Órgão:</strong> Receita Federal — COANA &nbsp;|&nbsp; <strong>Data do ato:</strong> 03/07/2026 &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 21/07/2026</p>
-        <p>Altera a <strong>Portaria COANA nº 192, de 13 de maio de 2026</strong>, que disciplina o trânsito simplificado de saída do país de remessas expressas em devolução ao exterior. Relevante para empresas de e-commerce internacional e operadores de remessas expressas (couriers).</p>
+        <p><strong>Órgão:</strong> Presidência da República &nbsp;|&nbsp; <strong>Altera:</strong> Decreto nº 12.955, de 29 de abril de 2026 (Regulamento da CBS)</p>
+        <p>O decreto posterga, para <strong>1º de janeiro de 2027</strong>, a produção de efeitos das disposições relativas à obrigatoriedade de inscrição no CNPJ e à emissão de documentos fiscais com destaque de CBS para:</p>
+        <ul>
+          <li><strong>Pessoas físicas</strong> na condição de contribuintes ou responsáveis tributários da CBS</li>
+          <li><strong>Produtores rurais pessoas físicas</strong></li>
+        </ul>
+        <p><strong>O que não muda:</strong> Para pessoas jurídicas (empresas), o prazo de <strong>03/08/2026</strong> para preenchimento obrigatório dos campos IBS/CBS nos DFe permanece inalterado. O prazo de 31/07/2026 para o período facultativo também é mantido.</p>
+        <p><strong>Contexto:</strong> A medida acompanha o desenvolvimento de um novo sistema simplificado de inscrição no CNPJ, inspirado no modelo do MEI (mencionado também pelo CGIBS). Isso significa que MEI, pequenos negócios individuais e agricultores familiares têm mais tempo para adequação.</p>
       </div>
       <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/en/web/dou/-/portaria-coana-n-199-de-3-de-julho-de-2026-720477148" target="_blank">Ver no DOU</a>
-        <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
-      </div>
-    </div>
-
-    <!-- ATO DECLARATÓRIO COANA -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="tag tag-dec">Ato Declaratório</span> COANA Nº 55/2026 — Mediana para crédito tributário de mercadoria importada extraviada/consumida (2º sem. 2026)</span>
-        <span class="card-date">DOU 21/07/2026</span>
-      </div>
-      <div class="card-body">
-        <p><strong>Órgão:</strong> Receita Federal — COANA &nbsp;|&nbsp; <strong>Data do ato:</strong> 16/07/2026 &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 21/07/2026</p>
-        <p>Divulga o <strong>valor da mediana em reais</strong> para lançamento no 2º semestre de 2026 do crédito tributário relativo à mercadoria importada que tenha sido extraviada ou consumida, nos termos do art. 67 da Lei nº 10.833/2003. Relevante para contribuintes que tenham sofrido extravio de mercadorias importadas e precisem apurar o crédito tributário correspondente.</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/ato-declaratorio-executivo-coana-n-55-de-16-de-julho-de-2026-720507223" target="_blank">Ver no DOU</a>
-      </div>
-    </div>
-
-    <!-- CIRCULAR SECEX -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="tag tag-circ">Circular SECEX</span> Nº 58/2026 — Investigação de dumping: papel decorativo originário da China</span>
-        <span class="card-date">DOU 21/07/2026</span>
-      </div>
-      <div class="card-body">
-        <p><strong>Órgão:</strong> MDIC — Secretaria de Comércio Exterior (SECEX) &nbsp;|&nbsp; <strong>Data do ato:</strong> 20/07/2026 &nbsp;|&nbsp; <strong>Publicação DOU:</strong> 21/07/2026</p>
-        <p>Torna públicos os novos prazos da investigação de prática de <strong>dumping</strong> nas exportações para o Brasil de <strong>papel decorativo</strong> (comumente classificado no subitem NCM 4805.91.00), originárias da <strong>China</strong>. Relevante para importadores e distribuidores de papel decorativo. A investigação foi iniciada pela Circular SECEX nº 51/2025.</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/web/dou/-/circular-n-58-de-20-de-julho-de-2026-720525782" target="_blank">Ver no DOU</a>
+        <a class="btn-link" href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/decreto/d13075.htm" target="_blank">Planalto — Decreto 13.075/2026</a>
+        <a class="btn-link secondary" href="https://radardareformatributaria.com/decreto-13075-2026-cbs-cnpj-nota-pessoa-fisica-produtor-rural/" target="_blank">Análise — Radar Reforma</a>
+        <a class="btn-link secondary" href="https://www.contabeis.com.br/noticias/78241/adiadas-exigencias-da-cbs-para-pessoas-fisicas-e-produtor es-rurais-ate-2027/" target="_blank">Contabeis.com.br</a>
       </div>
     </div>
 
   </div>
 
-  <!-- NOTAS TÉCNICAS -->
+  <!-- ======= NOTAS TÉCNICAS ======= -->
   <div id="nt-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128196;</div>
-      <strong>Nenhuma Nota Técnica NF-e publicada em 21/07/2026.</strong><br>
-      <span style="font-size:12px;">Última atualização conhecida: NT 2025.002 v.1.40 + NT 2026.002 v.1.0 + NT 2026.003 v.1.0 (schemas IBS/CBS/IS), disponibilizadas em ~10/07/2026. Produção obrigatória a partir de 03/08/2026.</span>
+      <strong>Nenhuma Nota Técnica publicada em 22/07/2026.</strong><br>
+      <span style="font-size:12px;">NT mais recente: 2014.001 v.1.40 (publicada em 15/07/2026) — EPEC: restrição para PR/PB a partir de 05/10/2026.<br>
+      NT 2026.001 v.1.02a — PAA (Provedor de Assinatura e Autorização), publicada em 23/06/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=" target="_blank">Portal NF-e — Notas Técnicas</a>
     </div>
   </div>
 
-  <!-- CONVÊNIOS ICMS -->
+  <!-- ======= CONVÊNIOS ICMS ======= -->
   <div id="convenio-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128220;</div>
-      <strong>Nenhum Convênio ICMS publicado em 21/07/2026.</strong><br>
-      <span style="font-size:12px;">Últimos convênios publicados: ICMS 87 a 90/2026, publicados em 15/07/2026 (426ª Reunião Extraordinária do CONFAZ).</span>
+      <strong>Nenhum Convênio ICMS publicado em 22/07/2026.</strong><br>
+      <span style="font-size:12px;">Últimos convênios: ICMS 87 a 90/2026 — publicados em 15/07/2026 (426ª Reunião Extraordinária do CONFAZ). Conv. 89 e 90: SP sai dos regimes de ST de tintas/vernizes e pneus/borracha. Conv. 87 e 88: prorrogações de benefícios até 31/12/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">CONFAZ — Convênios ICMS</a>
     </div>
   </div>
 
-  <!-- INSTRUÇÕES NORMATIVAS -->
+  <!-- ======= INSTRUÇÕES NORMATIVAS ======= -->
   <div id="in-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128209;</div>
-      <strong>Nenhuma Instrução Normativa RFB publicada em 21/07/2026.</strong><br>
-      <span style="font-size:12px;">Última IN publicada: RFB nº 2.336/2026 (restituição automática IRPF exercício 2025), publicada em 15/07/2026.</span>
+      <strong>Nenhuma Instrução Normativa da RFB publicada em 22/07/2026.</strong><br>
+      <span style="font-size:12px;">Última IN relevante: RFB nº 2.333/2026 (CNPJ — cadastro nacional pessoa jurídica), publicada em 10/07/2026.<br>
+      IN RFB 2.330/2026 (DITR 2026 — prazo 10/ago a 30/set), publicada em 08/07/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
       <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas Receita Federal</a>
     </div>
   </div>
 
-  <!-- PORTARIAS -->
+  <!-- ======= PORTARIAS / DECRETOS ======= -->
   <div id="portaria-tab" class="section">
 
-    <div class="card">
+    <div class="card card-highlight-green">
       <div class="card-header">
-        <span class="card-title"><span class="tag tag-port">Portaria</span> COANA Nº 199, de 03/07/2026 — Trânsito simplificado de remessas expressas em devolução ao exterior</span>
-        <span class="card-date">DOU 21/07/2026</span>
+        <span class="card-title"><span class="tag tag-dec">Decreto</span> nº 13.075, de 21/07/2026 — Altera Regulamento da CBS: adia obrigações de PF e produtores rurais para 01/01/2027</span>
+        <span class="card-date">DOU: 22/07/2026</span>
       </div>
       <div class="card-body">
-        <p><strong>Órgão:</strong> Coordenação-Geral de Administração Aduaneira (COANA) — Receita Federal</p>
-        <p><strong>Ementa:</strong> Altera a Portaria COANA nº 192, de 13 de maio de 2026, que disciplina o trânsito simplificado de saída do país de remessas expressas em devolução ao exterior.</p>
-        <p><strong>Impacto:</strong> Modifica procedimentos para empresas de courier e operadores de remessas internacionais (e-commerce cross-border). Contribuintes que realizam devoluções de mercadorias ao exterior via remessas expressas devem revisar os novos procedimentos estabelecidos.</p>
+        <p><strong>Órgão:</strong> Presidência da República &nbsp;|&nbsp; <strong>Altera:</strong> Decreto nº 12.955/2026 (Regulamento da CBS)</p>
+        <p>Adia para <strong>1º de janeiro de 2027</strong> a obrigatoriedade de inscrição no CNPJ e emissão de documentos fiscais com destaque de CBS para <strong>pessoas físicas contribuintes da CBS</strong> e <strong>produtores rurais pessoas físicas</strong>.</p>
+        <ul>
+          <li><strong>Mantido para PJ:</strong> 03/08/2026 — obrigatoriedade sistêmica para contribuintes regime regular</li>
+          <li><strong>Mantido para Simples Nacional / MEI:</strong> 04/01/2027</li>
+          <li><strong>Novo prazo PF / produtor rural PF:</strong> 01/01/2027</li>
+          <li>Medida acompanha o desenvolvimento de sistema simplificado de CNPJ para PF (modelo MEI)</li>
+          <li>Decreto publicado também confirmado pelo CGIBS em comunicado oficial</li>
+        </ul>
       </div>
       <div class="card-footer">
-        <a class="btn-link" href="https://www.in.gov.br/en/web/dou/-/portaria-coana-n-199-de-3-de-julho-de-2026-720477148" target="_blank">Ver no DOU</a>
-        <a class="btn-link secondary" href="https://normas.receita.fazenda.gov.br/sijut2consulta/consulta.action" target="_blank">Normas RFB</a>
+        <a class="btn-link" href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/decreto/d13075.htm" target="_blank">Planalto — Decreto 13.075/2026</a>
+        <a class="btn-link secondary" href="https://radardareformatributaria.com/decreto-13075-2026-cbs-cnpj-nota-pessoa-fisica-produtor-rural/" target="_blank">Análise detalhada</a>
       </div>
     </div>
 
   </div>
 
-  <!-- SOLUÇÕES DE CONSULTA -->
+  <!-- ======= SOLUÇÕES DE CONSULTA ======= -->
   <div id="sc-tab" class="section">
     <div class="empty">
       <div class="empty-icon">&#128172;</div>
-      <strong>Nenhuma Solução de Consulta publicada em 21/07/2026.</strong><br>
+      <strong>Nenhuma Solução de Consulta publicada em 22/07/2026.</strong><br>
       <span style="font-size:12px;">Última SC: Cosit nº 98.169/2026 (classificação NCM), publicada em 15/07/2026.</span>
     </div>
     <div class="card-footer" style="justify-content:center;background:transparent;border:none;">
@@ -240,20 +224,33 @@
     </div>
   </div>
 
-  <!-- HISTÓRICO -->
+  <!-- ======= HISTÓRICO ======= -->
   <div id="historico-tab" class="section">
 
     <div class="card">
       <div class="card-header">
-        <span class="card-title hist-date">&#128197; 21/07/2026 (terça-feira) <span class="hist-count">(3 publicações — aduaneiras/comércio exterior)</span></span>
+        <span class="card-title hist-date">&#128197; 22/07/2026 (quarta-feira) <span class="hist-count">(1 publicação — Decreto CBS para PF)</span></span>
       </div>
       <div class="card-body">
         <ul>
-          <li><span class="tag tag-port">Port.</span> Portaria COANA nº 199/2026 — Trânsito simplificado de remessas expressas em devolução ao exterior (Receita Federal)</li>
-          <li><span class="tag tag-dec">Dec.</span> Ato Declaratório Executivo COANA nº 55/2026 — Mediana para crédito tributário de mercadoria importada extraviada/consumida 2º sem. 2026 (Receita Federal)</li>
-          <li><span class="tag tag-circ">Circ.</span> Circular SECEX nº 58/2026 — Investigação dumping papel decorativo NCM 4805.91.00 originário da China (MDIC)</li>
+          <li><span class="tag tag-dec">Dec.</span> Decreto nº 13.075/2026 — Adia para 01/01/2027 obrigações de CBS para PF e produtores rurais PF. Regime PJ (CNPJ): mantido 03/08/2026 (DOU 22/07)</li>
         </ul>
-        <p style="font-size:12px;color:#8899aa;margin-top:8px;">Sem publicações tributárias diretas (IBS/CBS, ICMS, IPI, PIS/COFINS). Prazo crítico: 31/07/2026 (9 dias) — adequação NF-e IBS/CBS.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title hist-date">&#128197; 21/07/2026 (terça-feira) <span class="hist-count">(6 itens — portarias, NT e destaques Reforma Tributária)</span></span>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><span class="tag tag-port">Port.</span> Portaria COANA 199/2026 — Trânsito simplificado remessas expressas devolução ao exterior (DOU 21/07)</li>
+          <li><span class="tag tag-dec">ADE</span> ADE COANA 55/2026 — Mediana crédito tributário mercadoria importada extraviada (DOU 21/07)</li>
+          <li><span class="tag tag-nt">NT</span> NT 2014.001 v.1.40 (publi. 15/07) — EPEC: restrição PR/PB a partir de 05/10/2026 · Ajuste SINIEF 25/2026 (amplamente noticiada em 21/07)</li>
+          <li><span class="tag tag-cfc">CFC</span> Orientação Técnica CFC nº 1/2026 — Tratamento contábil IBS e CBS (publi. 20/07, noticiada 21/07)</li>
+          <li><span class="tag tag-cgibs">CGIBS</span> Governo e CGIBS estudam adiar obrigatoriedade IBS/CBS (prazo 03/08) por pelo menos 1 mês (notícia 20-21/07)</li>
+          <li><span class="tag tag-edit">Edital</span> Editais de Transação RFB 9 e 10/2026 (publi. 13/07, noticiados 21/07) — Contencioso adm. · Prazo adesão: 30/10/2026</li>
+        </ul>
       </div>
     </div>
 
@@ -285,7 +282,7 @@
       </div>
       <div class="card-body">
         <ul>
-          <li><span class="tag tag-nt">NT</span> Nota Técnica 2014.001 v.1.40 — EPEC: restrição PR/PB (Portal NF-e)</li>
+          <li><span class="tag tag-nt">NT</span> Nota Técnica 2014.001 v.1.40 — EPEC: restrição PR/PB a partir de 05/10/2026 (Portal NF-e)</li>
           <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 87/2026 — BC ICMS pneus/câmaras, prorrogação até 31/12/2026 (CONFAZ)</li>
           <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 88/2026 — Dedução PIS/COFINS Lei 10.147/00, prorrogação até 31/12/2026 (CONFAZ)</li>
           <li><span class="tag tag-conv">Conv.</span> Convênio ICMS 89/2026 — SP sai da ST de tintas e vernizes (CONFAZ)</li>
@@ -308,6 +305,7 @@
       <span class="source-chip"><a href="https://www.confaz.fazenda.gov.br/legislacao/convenios" target="_blank">confaz.fazenda.gov.br</a></span>
       <span class="source-chip"><a href="https://www.cgibs.gov.br/inicial" target="_blank">cgibs.gov.br</a></span>
       <span class="source-chip"><a href="https://noticias.iob.com.br/reforma-tributaria/" target="_blank">noticias.iob.com.br</a></span>
+      <span class="source-chip"><a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/decreto/d13075.htm" target="_blank">Planalto — Dec. 13.075/2026</a></span>
     </div>
   </div>
 </div>
