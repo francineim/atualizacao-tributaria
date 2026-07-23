@@ -19,10 +19,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Caminho do HTML gerado pela tarefa agendada
-HTML_FILE = os.path.join(os.path.dirname(__file__), "atualizacao-tributaria.html")
+# Tenta index.html primeiro (commitado pela tarefa agendada),
+# depois atualizacao-tributaria.html como fallback
+base = os.path.dirname(__file__)
+HTML_FILE = None
+for candidate in ["index.html", "atualizacao-tributaria.html"]:
+    path = os.path.join(base, candidate)
+    if os.path.exists(path):
+        HTML_FILE = path
+        break
 
-if os.path.exists(HTML_FILE):
+if HTML_FILE:
     with open(HTML_FILE, "r", encoding="utf-8") as f:
         html_content = f.read()
 
@@ -31,7 +38,7 @@ if os.path.exists(HTML_FILE):
 
 else:
     st.error(
-        "⚠️ Arquivo `atualizacao-tributaria.html` não encontrado.\n\n"
+        "⚠️ Arquivo HTML não encontrado.\n\n"
         "Execute a tarefa agendada **atualizao_tributria** no Cowork para gerar o arquivo, "
         "depois faça push para o repositório GitHub."
     )
@@ -41,6 +48,6 @@ else:
         "seu-repo/\n"
         "├── app.py\n"
         "├── requirements.txt\n"
-        "└── atualizacao-tributaria.html   ← gerado pela tarefa agendada\n"
+        "└── index.html   ← gerado pela tarefa agendada\n"
         "```"
     )
